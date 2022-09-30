@@ -10,7 +10,7 @@ Basic Brutus is a HTTP/HTTPS dictionary attack tool implemented in Rust programm
 cargo run -q
 ```
 
-The use `-u` to specify the usenrame, `-t` to specify the target uri and `-d` to specify the complete path to the dictionary.
+Then use `-u` to specify the usenrame, `-t` to specify the target uri and `-d` to specify the complete path to the dictionary.
 
 ```
 -u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
