@@ -1,30 +1,20 @@
-mod connection;
-mod console;
-mod file;
-mod parser;
+pub mod utils {
+    pub mod connection;
+    pub mod console;
+    pub mod file;
+    pub mod parser;
+}
 
-use connection::{http_req, BruteResponse};
-use console::read_line;
-use file::file_to_vec;
-use parser::parse;
 use rayon::prelude::*;
 use std::collections::HashMap;
 use std::process;
+use utils::connection::{http_req, BruteResponse};
+use utils::console::{print_result, print_welcome, read_line};
+use utils::file::file_to_vec;
+use utils::parser::parse;
 
 fn main() {
-    println!("====================================");
-    println!("=========== Basic Brutus ==========");
-    println!("====================================");
-    println!("Help:");
-    println!("====================================");
-    println!("-u = username");
-    println!("-d = dictionary path.");
-    println!("     Ex. /dictionary/filename.txt");
-    println!("-t = uri. Ex. https://website.com");
-    println!("====================================");
-    println!("all parameters are mandatory");
-    println!("====================================");
-
+    print_welcome();
     let command = read_line().unwrap();
     let parsed_command = parse(&command);
     if parsed_command.is_err() {
@@ -68,16 +58,15 @@ fn process_dictionary(
         let status = http_req(uri, &auth, username, &password);
         if status.is_ok() {
             let result = status.unwrap();
-            println!("==============================");
-            println!("==============================");
-            println!("======= Password found =======");
-            println!("=======  thread id {}  =======", idx);
-            println!("message:  {}", result.message);
-            println!("uri:      {}", result.uri);
-            println!("username: {}", result.username);
-            println!("password: {}", result.password);
-            println!("base64:   {}", result.base64);
-            println!("===============================");
+
+            print_result(
+                idx,
+                &result.message,
+                &result.uri,
+                &result.username,
+                &result.password,
+                &result.base64,
+            );
             process::exit(0x0100);
         } else {
             println!("thread {} | {}:{} ", idx, &username, &password);
