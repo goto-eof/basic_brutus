@@ -18,6 +18,12 @@ Then use `-u` to specify the usenrame, `-t` to specify the target uri and `-d` t
 
 ## Command line:
 
+Make executable:
+
+```
+cargo build
+```
+
 To view all commands:
 
 ```
