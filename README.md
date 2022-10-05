@@ -15,3 +15,9 @@ Then use `-u` to specify the usenrame, `-t` to specify the target uri and `-d` t
 ```
 -u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
 ```
+
+To run from command line:
+
+```
+basic_brutus -u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
+```
