@@ -9,8 +9,14 @@ pub fn read_line() -> Option<String> {
 pub fn print_welcome() {
     println!("====================================");
     println!("=========== Basic Brutus ==========");
+    print_help();
+}
+
+pub fn print_help() {
     println!("====================================");
     println!("Help:");
+    println!("====================================");
+    println!("--help = help");
     println!("====================================");
     println!("-u = username");
     println!("-d = dictionary path.");
@@ -19,6 +25,9 @@ pub fn print_welcome() {
     println!("====================================");
     println!("all parameters are mandatory");
     println!("====================================");
+}
+pub fn print_error(err_message: String) {
+    println!("{}", err_message);
 }
 
 pub fn print_result(
