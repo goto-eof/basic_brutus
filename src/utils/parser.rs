@@ -50,7 +50,9 @@ pub fn is_error(
 }
 
 fn is_command_well_formed(commands_map: &HashMap<String, String>) -> Result<(), BasicBrutusError> {
-    if commands_map.get("uri").is_none() || commands_map.get("dictionary").is_none() {
+    if commands_map.get("main").is_none()
+        && (commands_map.get("uri").is_none() || commands_map.get("dictionary").is_none())
+    {
         return Err(BasicBrutusError::new("Invalid command".to_string(), 3));
     }
     Ok(())
