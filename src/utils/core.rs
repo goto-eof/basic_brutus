@@ -27,7 +27,7 @@ fn attack(parsed_command: HashMap<String, String>) {
     let vec = file_to_vec(&filename).unwrap();
 
     let chunked_items = vec
-        .chunks(7)
+        .chunks(num_cpus::get())
         .map(|item| item.iter().map(String::from).collect::<Vec<String>>())
         .collect::<Vec<Vec<String>>>();
 
