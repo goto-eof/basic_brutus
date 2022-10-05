@@ -16,7 +16,7 @@ Then use `-u` to specify the usenrame, `-t` to specify the target uri and `-d` t
 -u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
 ```
 
-## command line:
+## Command line:
 
 To view all commands:
 
