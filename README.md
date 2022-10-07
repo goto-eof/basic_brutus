@@ -60,4 +60,6 @@ sudo apt-get install libssl-dev
 
 Tested on MacOS and Ubuntu and (today) it works.
 
+Dictionary files can be found [here](https://github.com/berandal666/Passwords).
+
 
