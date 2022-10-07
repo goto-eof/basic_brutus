@@ -58,4 +58,6 @@ sudo apt-get install pkg-config
 sudo apt-get install libssl-dev
 ```
 
+Tested on MacOS and Ubuntu and (today) it works.
+
 
