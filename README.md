@@ -39,3 +39,13 @@ To run a dictionary attack:
 ```
 basic_brutus -u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
 ```
+
+## Post Scriptum
+
+If you are using Linux, you should install some packages:
+
+```
+sudo apt-get install pkg-config
+
+sudo apt-get install libssl-dev
+```
