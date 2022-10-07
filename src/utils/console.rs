@@ -40,7 +40,7 @@ pub fn print_result(
 ) {
     println!("==============================");
     println!("==============================");
-    println!("======= Password found =======");
+    println!("===== Password found :) ======");
     println!("=======  thread id {}  =======", idx);
     println!("message:  {}", message);
     println!("uri:      {}", uri);
