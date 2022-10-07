@@ -40,6 +40,14 @@ To run a dictionary attack:
 basic_brutus -u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
 ```
 
+## Some statistics
+
+```
+MacOS  -  M1 Pro            -  8 thread   ->  ~42s
+Ubuntu -  Ryzen 7 (4800H)   -  16 thread  ->  ~140s
+MacOS  -  M1 Pro            -  1 thread   ->  ~240s
+```
+
 ## Post Scriptum
 
 If you are using Linux, you should install some packages:
@@ -49,3 +57,5 @@ sudo apt-get install pkg-config
 
 sudo apt-get install libssl-dev
 ```
+
+
