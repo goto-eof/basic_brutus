@@ -33,7 +33,7 @@ fn attack_optimized(parsed_command: HashMap<String, String>) {
         let uri = parsed_command.get("uri").unwrap();
         let username = parsed_command.get("username").unwrap();
         rayon::scope(|s| {
-            let (work_queue_sender, work_queue_receiver) = crossbeam_channel::bounded(100000000000);
+            let (work_queue_sender, work_queue_receiver) = crossbeam_channel::bounded(10000000);
             let max_threads_supported = num_cpus::get();
             for task_counter in 0..max_threads_supported {
                 let work_receiver: Receiver<String> = work_queue_receiver.clone();
