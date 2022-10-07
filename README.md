@@ -37,7 +37,7 @@ basic_brutus --help
 To run a dictionary attack:
 
 ```
-basic_brutus -u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
+./basic_brutus -u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
 ```
 
 ## Some statistics
