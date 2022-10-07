@@ -1,4 +1,43 @@
-pub fn http_req(
+use async_std::task;
+
+pub fn http_req(    uri: &str,
+    auth: &str,
+    username: &str,
+    password: &str) -> Result<BruteResponse, String> {
+        use reqwest::header::USER_AGENT;
+    let hosts: Vec<String> = vec![];
+  let res =   task::block_on(async move {
+    
+        match reqwest::Client::builder()
+            .danger_accept_invalid_certs(true)
+            .danger_accept_invalid_hostnames(true)
+            .build()
+            .unwrap()
+            .get(uri)
+            .header(USER_AGENT, "Basic Brutus")
+        .header("Authorization", format!("Base {}", auth))
+
+            .send()
+            .await
+        {
+            Ok(x) => x,
+            Err(x) => panic!(),
+        }
+    });
+    if res.status().is_success() {
+        return Ok(BruteResponse::new(
+            "yahoo!".to_string(),
+            username.to_string(),
+            password.to_string(),
+            uri.to_string(),
+            auth.to_string(),
+        ));
+    }
+    return Err("Nada".to_string());
+}
+
+
+pub fn http_req_old(
     uri: &str,
     auth: &str,
     username: &str,
