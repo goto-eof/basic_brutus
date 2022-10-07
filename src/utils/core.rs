@@ -35,6 +35,7 @@ fn attack_optimized(parsed_command: HashMap<String, String>) {
         rayon::scope(|s| {
             let (work_queue_sender, work_queue_receiver) = crossbeam_channel::bounded(10000000);
             let max_threads_supported = num_cpus::get();
+            println!("I will use [{}] threads", max_threads_supported);
             for task_counter in 0..max_threads_supported {
                 let work_receiver: Receiver<String> = work_queue_receiver.clone();
                 s.spawn(move |_| {
