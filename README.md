@@ -20,7 +20,7 @@ Then use `-u` to specify the usenrame, `-t` to specify the target uri, `-d` to s
 ```
 -u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
 
- -t https://website.com/something -v /PATH/TO/USERNAMES_FILE.txt  -d /PATH/TO/DICTIONARY.txt
+-t https://website.com/something -v /PATH/TO/USERNAMES_FILE.txt  -d /PATH/TO/DICTIONARY.txt
 
 ```
 
