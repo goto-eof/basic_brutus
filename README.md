@@ -41,6 +41,13 @@ To run a dictionary attack:
 ./basic_brutus -u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
 ```
 
+## Environment variables
+
+`CHANNEL_BUFFER=10000000` - buffer size of the inter-thread communication channel.
+
+`MAX_NUM_THREADS=12` - if specified, the default thread count (corresponding to the number of processor cores) will be overwritten by the value entered by the user.
+
+
 ## Some statistics
 
 ```
