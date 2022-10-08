@@ -43,6 +43,8 @@ To run a dictionary attack:
 
 ## Environment variables
 
+The environment variables are found in the .env file of the project and allows you to alter the behavior of the application.
+
 `CHANNEL_BUFFER=10000000` - buffer size of the inter-thread communication channel. The default value is 10000000.
 
 `MAX_NUM_THREADS=12` - if specified, the default thread count (corresponding to the number of processor cores) will be overwritten by the value entered by the user.
