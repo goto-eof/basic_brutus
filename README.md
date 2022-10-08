@@ -75,7 +75,7 @@ I used the same dictionary file on three different computers.
 1. MacOS  -  M1 Pro                -  1 thread   ->  ~240s
 ```
 
-## Post Scriptum
+## Linux users
 
 If you are using Linux, you should install some packages:
 
