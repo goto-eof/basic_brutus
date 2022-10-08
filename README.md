@@ -59,15 +59,6 @@ The environment variables are found in the .env file of the project and allows y
 
 Dictionary files can be found [here](https://github.com/berandal666/Passwords).
 
-## Post Scriptum
-
-If you are using Linux, you should install some packages:
-
-```
-sudo apt-get install pkg-config
-
-sudo apt-get install libssl-dev
-```
 ## Tests
 
 Tested on MacOS and Ubuntu and (today) it works.
@@ -82,4 +73,14 @@ I used the same dictionary file on three different computers.
 3. Ubuntu -  AMD Ryzen 7 (4800H)   -  16 thread  ->  ~133s
 ------------------------------------------------------------
 1. MacOS  -  M1 Pro                -  1 thread   ->  ~240s
+```
+
+## Post Scriptum
+
+If you are using Linux, you should install some packages:
+
+```
+sudo apt-get install pkg-config
+
+sudo apt-get install libssl-dev
 ```
