@@ -8,7 +8,7 @@ pub fn http_req(
 ) -> Result<BruteResponse, String> {
     use reqwest::header::USER_AGENT;
     let res = task::block_on(async move {
-       reqwest::Client::builder()
+      match reqwest::Client::builder()
             .danger_accept_invalid_certs(true)
             .danger_accept_invalid_hostnames(true)
             .build()
@@ -18,9 +18,13 @@ pub fn http_req(
             .header("Authorization", format!("Base {}", auth))
             .send()
             .await
+            {
+                Ok(x) => x,
+                Err(_) => panic!(), // request failed
+            }
     });
 
-    if res.is_ok() && res.unwrap().status().is_success(){
+    if res.status().is_success() {
             return Ok(BruteResponse::new(
                 "Let's login now!".to_string(),
                 username.to_string(),
