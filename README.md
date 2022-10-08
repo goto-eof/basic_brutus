@@ -7,7 +7,7 @@ Basic Brutus is a HTTP/HTTPS Basic Authentication dictionary attack tool impleme
 ## How it works?
 
 Basic Brutus creates a group of threads on which it distributes work while the dictionary file is read line by line. The first thread that manages to get the password X from the channel will be the thread that will also have to process it, which means making an attempt to verify the matching of the username and the password.
-Currently Basic Brutus allows the use of only one username. In the future it is foreseen the implementation of loading of a list of usernames from a file.
+Currently Basic Brutus allows the use many usernames that are loaded from a file.
 
 ## How to use it?
 
@@ -15,10 +15,13 @@ Currently Basic Brutus allows the use of only one username. In the future it is 
 cargo run -q
 ```
 
-Then use `-u` to specify the usenrame, `-t` to specify the target uri and `-d` to specify the complete path to the password dictionary.
+Then use `-u` to specify the usenrame, `-t` to specify the target uri, `-d` to specify the complete path to the password dictionary, `-v` to specify the usernames file.
 
 ```
 -u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
+
+ -t https://website.com/something -v /PATH/TO/USERNAMES_FILE.txt  -d /PATH/TO/DICTIONARY.txt
+
 ```
 
 ## Command line:
@@ -39,14 +42,16 @@ To run a dictionary attack:
 
 ```
 ./basic_brutus -u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
+
+./basic_brutus -v /PATH/TO/USERNAMES_FILE.txt -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
 ```
 
 ## Environment variables
 
 The environment variables are found in the .env file of the project and allows you to alter the behavior of the application.
-* `CHANNEL_BUFFER=10000000` - buffer size of the inter-thread communication channel. The default value is 10000000.
-* `MAX_NUM_THREADS=12` - if specified, the default thread count (corresponding to the number of processor cores) will be overwritten by the value specified by the user in the .env file.
 
+- `CHANNEL_BUFFER=10000000` - buffer size of the inter-thread communication channel. The default value is 10000000.
+- `MAX_NUM_THREADS=12` - if specified, the default thread count (corresponding to the number of processor cores) will be overwritten by the value specified by the user in the .env file.
 
 ## Some statistics
 
@@ -71,7 +76,3 @@ sudo apt-get install libssl-dev
 ```
 
 Tested on MacOS and Ubuntu and (today) it works.
-
-
-
-

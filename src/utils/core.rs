@@ -132,6 +132,7 @@ fn do_job(task_counter: usize, uri: &str, start: &Instant, work_receiver: Receiv
                     Ok(_) => {
                         let duration = start.elapsed();
                         println!("duration: {:?}", duration);
+                        println!("===============================");
                         process::exit(0x0100);
                     }
                     Err(_) => (),
