@@ -52,7 +52,7 @@ The environment variables are found in the .env file of the project and allows y
 
 ```
 MacOS  -  M1 Pro            -  8 thread   ->  ~42s
-Ubuntu -  Ryzen 7 (4800H)   -  16 thread  ->  ~148s
+Ubuntu -  Ryzen 7 (4800H)   -  16 thread  ->  ~133s
 MacOS  -  M1 Pro            -  1 thread   ->  ~240s
 ```
 
