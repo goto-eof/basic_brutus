@@ -25,7 +25,7 @@ pub fn http_req(
     });
     if res.status().is_success() {
         return Ok(BruteResponse::new(
-            "yahoo!".to_string(),
+            "Let's login now!".to_string(),
             username.to_string(),
             password.to_string(),
             uri.to_string(),

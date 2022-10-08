@@ -94,7 +94,7 @@ fn do_job(
     loop {
         let tx_res = work_receiver.recv();
         match tx_res {
-            Ok(tx) => match attack_request(&username, &uri, &tx) {
+            Ok(tx) => match attack_request(task_counter, &username, &uri, &tx) {
                 Ok(_) => {
                     let duration = start.elapsed();
                     println!("duration: {:?}", duration);
@@ -110,14 +110,18 @@ fn do_job(
     }
 }
 
-fn attack_request(username: &str, uri: &str, password: &str) -> Result<BruteResponse, String> {
+fn attack_request(
+    idx: usize,
+    username: &str,
+    uri: &str,
+    password: &str,
+) -> Result<BruteResponse, String> {
     let auth = base64::encode(format!("{}:{}", &username, &password));
     let status = http_req(uri, &auth, username, &password);
     if status.is_ok() {
         let result = status.unwrap();
-
         print_result(
-            0,
+            idx,
             &result.message,
             &result.uri,
             &result.username,
@@ -127,8 +131,10 @@ fn attack_request(username: &str, uri: &str, password: &str) -> Result<BruteResp
         return Ok(result);
     } else {
         println!(
-            "username: {}, password :{} does not match :(",
-            &username, &password
+            "thread: {}, username: {}, password :{} does not match :(",
+            idx + 1,
+            &username,
+            &password
         );
     }
     Err("No password found".to_string())
