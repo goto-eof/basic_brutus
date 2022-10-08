@@ -56,7 +56,7 @@ The environment variables are found in the .env file of the project and allows y
 - `CHANNEL_BUFFER=10000000` - buffer size of the inter-thread communication channel. The default value is 10000000.
 - `MAX_NUM_THREADS=12` - if specified, the default thread count (corresponding to the number of processor cores) will be overwritten by the value specified by the user in the .env file.
 
-## Some statistics
+## Comparison
 
 ```
 MacOS  -  M1 Pro            -  8 thread   ->  ~42s
