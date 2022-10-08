@@ -15,10 +15,10 @@ use utils::core::execute_command;
 use utils::parser::BasicBrutusError;
 use utils::parser::{is_error, parse};
 
-extern crate openssl_probe;
+use dotenv;
 
 fn main() {
-    openssl_probe::init_ssl_cert_env_vars();
+    dotenv::dotenv().ok();
 
     let args: Vec<String> = env::args().collect();
     let args_str = args.join(" ");

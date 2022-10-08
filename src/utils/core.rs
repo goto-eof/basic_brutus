@@ -26,8 +26,11 @@ pub fn execute_command(parsed_command: HashMap<String, String>) {
 }
 
 fn attack_optimized(parsed_command: HashMap<String, String>) {
-    const CHANNEL_BOUND: usize = 10000000;
-
+    let channel_buffer: usize = dotenv::var("CHANNEL_BUFFER")
+        .unwrap()
+        .parse::<usize>()
+        .unwrap();
+    println!("The channel buffer is {}", channel_buffer);
     let start = Instant::now();
     let filename = parsed_command.get("dictionary").unwrap();
     println!("Reading filename {}...", &filename);
@@ -36,7 +39,7 @@ fn attack_optimized(parsed_command: HashMap<String, String>) {
         let username = parsed_command.get("username").unwrap();
         rayon::scope(|s| {
             let (work_queue_sender, work_queue_receiver) =
-                crossbeam_channel::bounded(CHANNEL_BOUND);
+                crossbeam_channel::bounded(channel_buffer);
             let max_threads_supported = num_cpus::get();
             println!("I will use [{}] threads", max_threads_supported);
             for task_counter in 0..max_threads_supported {

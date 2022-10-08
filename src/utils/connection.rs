@@ -20,7 +20,7 @@ pub fn http_req(
             .await
         {
             Ok(x) => x,
-            Err(x) => panic!(),
+            Err(_) => panic!(),
         }
     });
     if res.status().is_success() {
