@@ -61,18 +61,19 @@ Dictionary files can be found [here](https://github.com/berandal666/Passwords).
 
 ## Tests
 
-Tested on MacOS and Ubuntu and (today) it works.
+Tested on `MacOS`, `Ubuntu` and `Windows 11` and (today) it works.
 
 ## Comparison
 
-I used the same dictionary file on three different computers.
+I used the same dictionary file on three different notebooks not connected to the mains.
 
 ```
-1. MacOS  -  M1 Pro                -  8 thread   ->  ~42s
-2. Ubuntu -  Intel i7-10750H       -  12 thread  ->  ~53s
-3. Ubuntu -  AMD Ryzen 7 (4800H)   -  16 thread  ->  ~133s
-------------------------------------------------------------
-1. MacOS  -  M1 Pro                -  1 thread   ->  ~240s
+1. MacOS       -  M1 Pro                -  8 threads   ->  ~42s
+2. Ubuntu      -  Intel i7-10750H       -  12 threads  ->  ~53s
+3. Windows 11  -  Intel i7-10750H       -  12 threads  ->  ~70s
+3. Ubuntu      -  AMD Ryzen 7 (4800H)   -  16 threads  ->  ~133s
+-----------------------------------------------------------------
+1. MacOS       -  M1 Pro                -  1 thread    ->  ~240s
 ```
 
 ## Linux users
