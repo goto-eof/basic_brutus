@@ -1,5 +1,9 @@
 use crossbeam_channel::Receiver;
 
+const MAX_NMUM_THREADS: &str = "MAX_NUM_THREADS";
+const CHANNEL_BUFFER: &str = "CHANNEL_BUFFER";
+const CHANNEL_BUFFER_DEF_VALUE: usize = 10000000;
+
 use super::{
     connection::{http_req, BruteResponse},
     console::{print_error, print_help, print_result},
@@ -15,7 +19,6 @@ use std::{
 
 pub fn execute_command(parsed_command: HashMap<String, String>) {
     let main = parsed_command.get("main");
-
     match main {
         Some(value) => match value.to_string().as_str() {
             "help" => print_help(),
@@ -26,10 +29,8 @@ pub fn execute_command(parsed_command: HashMap<String, String>) {
 }
 
 fn attack_optimized(parsed_command: HashMap<String, String>) {
-    let channel_buffer: usize = dotenv::var("CHANNEL_BUFFER")
-        .unwrap()
-        .parse::<usize>()
-        .unwrap();
+    let num_threads = load_env_variable_as_usize(MAX_NMUM_THREADS, num_cpus::get(), true);
+    let channel_buffer = load_env_variable_as_usize(CHANNEL_BUFFER, CHANNEL_BUFFER_DEF_VALUE, true);
     println!("The channel buffer is {}", channel_buffer);
     let start = Instant::now();
     let filename = parsed_command.get("dictionary").unwrap();
@@ -40,9 +41,8 @@ fn attack_optimized(parsed_command: HashMap<String, String>) {
         rayon::scope(|s| {
             let (work_queue_sender, work_queue_receiver) =
                 crossbeam_channel::bounded(channel_buffer);
-            let max_threads_supported = num_cpus::get();
-            println!("I will use [{}] threads", max_threads_supported);
-            for task_counter in 0..max_threads_supported {
+            println!("I will use [{}] threads", num_threads);
+            for task_counter in 0..num_threads {
                 let work_receiver: Receiver<String> = work_queue_receiver.clone();
                 s.spawn(move |_| {
                     do_job(
@@ -58,11 +58,28 @@ fn attack_optimized(parsed_command: HashMap<String, String>) {
             for line in lines {
                 if let Ok(password) = line {
                     work_queue_sender.send(password).unwrap();
-                    i = (i + 1) % max_threads_supported;
+                    i = (i + 1) % num_threads;
                 }
             }
             drop(work_queue_sender);
         });
+    }
+}
+
+fn load_env_variable_as_usize(
+    var_name: &str,
+    default_value: usize,
+    greater_than_zero: bool,
+) -> usize {
+    match dotenv::var(var_name) {
+        Ok(data) => {
+            let value = data.parse::<usize>().unwrap();
+            if greater_than_zero && value <= 0 {
+                return default_value;
+            }
+            return value;
+        }
+        Err(_) => default_value,
     }
 }
 
