@@ -6,7 +6,8 @@ Basic Brutus is a HTTP/HTTPS Basic Authentication dictionary attack tool impleme
 
 ## How it works?
 
-Basic Brutus creates a group of threads on which it distributes work as the dictionary file is read line by line. The first thread that manages to get the password X from the channel will be the thread that will also have to process it, which means making an attempt to verify the matching of the username and the password.
+Basic Brutus creates a group of threads on which it distributes work while the dictionary file is read line by line. The first thread that manages to get the password X from the channel will be the thread that will also have to process it, which means making an attempt to verify the matching of the username and the password.
+Currently Basic Brutus allows the use of only one username. In the future it is foreseen the implementation of loading of a list of usernames from a file.
 
 ## How to use it?
 
@@ -44,9 +45,13 @@ To run a dictionary attack:
 
 ```
 MacOS  -  M1 Pro            -  8 thread   ->  ~42s
-Ubuntu -  Ryzen 7 (4800H)   -  16 thread  ->  ~140s
+Ubuntu -  Ryzen 7 (4800H)   -  16 thread  ->  ~148s
 MacOS  -  M1 Pro            -  1 thread   ->  ~240s
 ```
+
+## Dictionaries
+
+Dictionary files can be found [here](https://github.com/berandal666/Passwords).
 
 ## Post Scriptum
 
@@ -60,6 +65,6 @@ sudo apt-get install libssl-dev
 
 Tested on MacOS and Ubuntu and (today) it works.
 
-Dictionary files can be found [here](https://github.com/berandal666/Passwords).
+
 
 
