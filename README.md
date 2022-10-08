@@ -7,7 +7,7 @@ Basic Brutus is a HTTP/HTTPS Basic Authentication dictionary attack tool impleme
 ## How it works?
 
 Basic Brutus creates a group of threads on which it distributes work while the dictionary file is read line by line. The first thread that manages to get the password X from the channel will be the thread that will also have to process it, which means making an attempt to verify the matching of the username and the password.
-Currently Basic Brutus allows the use many usernames that are loaded from a file.
+Currently Basic Brutus allows the use of many usernames that are loaded from a file.
 
 ## How to use it?
 
