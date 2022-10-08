@@ -28,6 +28,7 @@ pub fn parse(command: &str) -> Result<HashMap<String, String>, BasicBrutusError>
             "-t" => commands_map.insert("uri".to_string(), splitted[i + 1].to_string()),
             "-d" => commands_map.insert("dictionary".to_string(), splitted[i + 1].to_string()),
             "-u" => commands_map.insert("username".to_string(), splitted[i + 1].to_string()),
+            "-v" => commands_map.insert("usernames".to_string(), splitted[i + 1].to_string()),
             "--help" => commands_map.insert("main".to_string(), "help".to_string()),
             _ => None,
         };
