@@ -48,6 +48,10 @@ Ubuntu -  Ryzen 7 (4800H)   -  16 thread  ->  ~140s
 MacOS  -  M1 Pro            -  1 thread   ->  ~240s
 ```
 
+## Dictionaries
+
+Dictionary files can be found [here](https://github.com/berandal666/Passwords).
+
 ## Post Scriptum
 
 If you are using Linux, you should install some packages:
@@ -60,6 +64,6 @@ sudo apt-get install libssl-dev
 
 Tested on MacOS and Ubuntu and (today) it works.
 
-Dictionary files can be found [here](https://github.com/berandal666/Passwords).
+
 
 
