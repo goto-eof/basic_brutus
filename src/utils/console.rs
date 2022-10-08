@@ -19,11 +19,13 @@ pub fn print_help() {
     println!("--help = help");
     println!("====================================");
     println!("-u = username");
-    println!("-d = dictionary path.");
-    println!("     Ex. /dictionary/filename.txt");
-    println!("-t = uri. Ex. https://website.com");
-    println!("====================================");
-    println!("all parameters are mandatory");
+    println!("     Ex. bill.gates");
+    println!("-v = username file path");
+    println!("     Ex. /directory/usernames.txt");
+    println!("-d = dictionary file path");
+    println!("     Ex. /dictionary/passwords.txt");
+    println!("-t = uri");
+    println!("     Ex. https://website.com");
     println!("====================================");
 }
 pub fn print_error(err_message: String) {
