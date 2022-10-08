@@ -62,6 +62,7 @@ I used the same dictionary file on two different computers.
 ```
 MacOS  -  M1 Pro            -  8 thread   ->  ~42s
 Ubuntu -  Ryzen 7 (4800H)   -  16 thread  ->  ~133s
+
 MacOS  -  M1 Pro            -  1 thread   ->  ~240s
 ```
 
