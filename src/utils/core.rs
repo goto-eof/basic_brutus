@@ -133,7 +133,7 @@ fn do_job(task_counter: usize, uri: &str, start: &Instant, work_receiver: Receiv
                         let duration = start.elapsed();
                         println!("duration: {:?}", duration);
                         println!("===============================");
-                        process::exit(0x0100);
+                        process::exit(0x0000);
                     }
                     Err(_) => (),
                 }
@@ -154,6 +154,7 @@ fn attack_request(
 ) -> Result<BruteResponse, String> {
     let auth = base64::encode(format!("{}:{}", &username, &password));
     let status = http_req(uri, &auth, username, &password);
+
     if status.is_ok() {
         let result = status.unwrap();
         print_result(
