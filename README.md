@@ -63,8 +63,8 @@ I used the same dictionary file on three different computers.
 1. MacOS  -  M1 Pro                -  8 thread   ->  ~42s
 2. Ubuntu -  Intel i7-10750H       -  12 thread  ->  ~67s
 3. Ubuntu -  AMD Ryzen 7 (4800H)   -  16 thread  ->  ~133s
-
-1. MacOS  -  M1 Pro            -  1 thread   ->  ~240s
+------------------------------------------------------------
+1. MacOS  -  M1 Pro                -  1 thread   ->  ~240s
 ```
 
 ## Dictionaries
