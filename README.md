@@ -14,7 +14,7 @@ Basic Brutus creates a group of threads on which it distributes work while the d
 cargo run -q
 ```
 
-Then use `-u` to specify the usenrame, `-t` to specify the target uri, `-d` to specify the complete path to the password dictionary, `-v` to specify the usernames file.
+Use `-u` to specify the usenrame, `-t` to specify the target uri, `-d` to specify the complete path to the password dictionary, `-v` to specify the usernames file.
 
 ```
 -u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
