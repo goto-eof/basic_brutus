@@ -26,48 +26,67 @@ pub fn execute_command(parsed_command: HashMap<String, String>) {
 }
 
 fn attack_optimized(parsed_command: HashMap<String, String>) {
+    const CHANNEL_BOUND: usize = 10000000;
+
     let start = Instant::now();
     let filename = parsed_command.get("dictionary").unwrap();
-    println!("Reading {}...", &filename);
+    println!("Reading filename {}...", &filename);
     if let Ok(lines) = read_lines(&filename) {
         let uri = parsed_command.get("uri").unwrap();
         let username = parsed_command.get("username").unwrap();
         rayon::scope(|s| {
-            let (work_queue_sender, work_queue_receiver) = crossbeam_channel::bounded(10000000);
+            let (work_queue_sender, work_queue_receiver) =
+                crossbeam_channel::bounded(CHANNEL_BOUND);
             let max_threads_supported = num_cpus::get();
             println!("I will use [{}] threads", max_threads_supported);
             for task_counter in 0..max_threads_supported {
                 let work_receiver: Receiver<String> = work_queue_receiver.clone();
                 s.spawn(move |_| {
-                    println!("thread {} initialized", &task_counter);
-                    loop {
-                        let tx_res = work_receiver.recv();
-                        match tx_res {
-                            Ok(tx) => match attack_request(&username, &uri, &tx) {
-                                Ok(_) => {
-                                    let duration = start.elapsed();
-                                    println!("DURATION: {:?}", duration);
-                                    process::exit(0x0100);
-                                }
-                                _ => (),
-                            },
-                            Err(err) => {
-                                println!("thread {} finished job: {}", &task_counter, err);
-                                break;
-                            }
-                        }
-                    }
+                    do_job(
+                        task_counter,
+                        username.as_str(),
+                        uri.as_str(),
+                        &start,
+                        work_receiver,
+                    );
                 });
             }
             let mut i = 0;
             for line in lines {
-                if let Ok(ip) = line {
-                    work_queue_sender.send(ip).unwrap();
-                    i = (i + 1) % (max_threads_supported);
+                if let Ok(password) = line {
+                    work_queue_sender.send(password).unwrap();
+                    i = (i + 1) % max_threads_supported;
                 }
             }
             drop(work_queue_sender);
         });
+    }
+}
+
+fn do_job(
+    task_counter: usize,
+    username: &str,
+    uri: &str,
+    start: &Instant,
+    work_receiver: Receiver<String>,
+) {
+    println!("thread {} initialized", &task_counter);
+    loop {
+        let tx_res = work_receiver.recv();
+        match tx_res {
+            Ok(tx) => match attack_request(&username, &uri, &tx) {
+                Ok(_) => {
+                    let duration = start.elapsed();
+                    println!("duration: {:?}", duration);
+                    process::exit(0x0100);
+                }
+                _ => (),
+            },
+            Err(err) => {
+                println!("thread {} finished job: {}", &task_counter, err);
+                break;
+            }
+        }
     }
 }
 
