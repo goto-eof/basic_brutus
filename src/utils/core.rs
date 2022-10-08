@@ -44,7 +44,7 @@ fn run_attack(parsed_command: HashMap<String, String>) {
             let work_receiver: Receiver<String> = work_queue_receiver.clone();
 
             s.spawn(move |_| {
-                do_job(task_counter, uri.as_str(), &start, work_receiver);
+                do_job(task_counter, num_threads, uri.as_str(), &start, work_receiver);
             });
         }
 
@@ -118,7 +118,7 @@ fn load_env_variable_as_usize(
     }
 }
 
-fn do_job(task_counter: usize, uri: &str, start: &Instant, work_receiver: Receiver<String>) {
+fn do_job(task_counter: usize, num_threads: usize, uri: &str, start: &Instant, work_receiver: Receiver<String>) {
     println!("thread {} initialized", &task_counter);
     loop {
         let tx_res = work_receiver.recv();
@@ -132,8 +132,9 @@ fn do_job(task_counter: usize, uri: &str, start: &Instant, work_receiver: Receiv
                     Ok(_) => {
                         let duration = start.elapsed();
                         println!("duration: {:?}", duration);
+                        println!("total n. of threads: {:?}", num_threads);
                         println!("===============================");
-                        process::exit(0x0100);
+                        process::exit(0x0000);
                     }
                     Err(_) => (),
                 }
@@ -154,6 +155,7 @@ fn attack_request(
 ) -> Result<BruteResponse, String> {
     let auth = base64::encode(format!("{}:{}", &username, &password));
     let status = http_req(uri, &auth, username, &password);
+
     if status.is_ok() {
         let result = status.unwrap();
         print_result(
