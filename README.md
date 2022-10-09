@@ -92,3 +92,9 @@ sudo apt-get install pkg-config
 
 sudo apt-get install libssl-dev
 ```
+
+## Mac OS users
+
+if you downloaded the executable, make sure you allow execution of non verified applications. So that go to Settings > Security & Privacy > General, Click on "Allow Anyway", try to execute applciation again and click on Open option.
+
+
