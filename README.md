@@ -1,4 +1,4 @@
-![alt basic brutus](./header.jpg)
+![alt basic brutus](./header2.jpg)
 
 # What is the project «Basic Brutus»?
 
