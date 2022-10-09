@@ -21,23 +21,38 @@ pub async fn http_req(
     username: &str,
     password: &str,
     failed_and_restored_requests: &mut i32,
+    max_failed_requests: i32,
 ) -> Result<BruteResponse, String> {
     let mut res = task::block_on(async move {
         let auth_base = format!("Base {}", auth);
         request(uri, &auth_base).await
     });
 
-    while res.is_err() {
+    let mut count_failed_requests = 0;
+
+    while res.is_err() && (max_failed_requests == -1 || count_failed_requests < max_failed_requests)
+    {
         log(&format!(
             "[KO] -> Error. Retrying username:[{}], password[{}]...",
             username, password
         ));
+
+        count_failed_requests = count_failed_requests + 1;
 
         *failed_and_restored_requests = (*failed_and_restored_requests) + 1;
         let auth_base = format!("Base {}", auth);
         res = task::block_on(async move { request(uri, &auth_base.as_str()).await });
     }
 
+    if res.is_err() {
+        return Err(format!(
+            "Attempts: {}, Error {}",
+            count_failed_requests,
+            res.err().unwrap()
+        ));
+    }
+
+    log(&format!("Attempts: {}", count_failed_requests));
     if res.unwrap().status().is_success() {
         return Ok(BruteResponse::new(
             "Let's login now!".to_string(),
@@ -47,7 +62,7 @@ pub async fn http_req(
             auth.to_string(),
         ));
     }
-    return Err("Error".to_string());
+    return Err("Username and password does not match".to_string());
 }
 
 async fn request(uri: &str, auth: &str) -> Result<Response, reqwest::Error> {

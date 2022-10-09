@@ -30,6 +30,10 @@ pub fn parse(command: &str) -> Result<HashMap<String, String>, BasicBrutusError>
             "-u" => commands_map.insert("username".to_string(), splitted[i + 1].to_string()),
             "-uu" => commands_map.insert("usernames".to_string(), splitted[i + 1].to_string()),
             "-v" => commands_map.insert("verbose".to_string(), splitted[i + 1].to_string()),
+            "-f" => commands_map.insert(
+                "max_failed_requests".to_string(),
+                splitted[i + 1].to_string(),
+            ),
             "--help" => commands_map.insert("main".to_string(), "help".to_string()),
             _ => None,
         };

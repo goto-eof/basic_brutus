@@ -30,85 +30,89 @@ pub fn execute_command(parsed_command: HashMap<String, String>, original_command
 }
 
 fn run_attack(parsed_command: HashMap<String, String>, original_command: &str) {
-    let num_threads = load_env_variable_as_usize(MAX_NMUM_THREADS, num_cpus::get(), true);
-    let channel_buffer = load_env_variable_as_usize(CHANNEL_BUFFER, CHANNEL_BUFFER_DEF_VALUE, true);
-
-    log(&format!("The channel buffer is {}", channel_buffer));
-    let start = Instant::now();
     let uri = parsed_command.get("uri").unwrap();
-
-    let basic_protected_result = is_basic_protected(&uri);
-
-    if basic_protected_result.is_some() {
+    if is_basic_protected(&uri).is_some() {
         log("Basic HTTP Authentication detected");
-        let dictionary_attack = check_username_and_passwords;
-        rayon::scope(|s| {
-            let mut failed_and_restored_requests = 0;
-            let (work_queue_sender, work_queue_receiver) =
-                crossbeam_channel::bounded(channel_buffer);
-            log(&format!("I will use [ {} ] threads", num_threads));
-            for task_counter in 0..num_threads {
-                let pc = parsed_command.clone();
-                let work_receiver: Receiver<String> = work_queue_receiver.clone();
-                s.spawn(move |_| {
-                    task::block_on(do_job(
-                        task_counter,
-                        num_threads,
-                        uri.as_str(),
-                        &start,
-                        work_receiver,
-                        original_command,
-                        &mut failed_and_restored_requests,
-                        &pc,
-                    ));
-                });
-            }
-
-            let filename_passwords = parsed_command.get("dictionary").unwrap();
-            log(&format!(" Reading filename {}...", &filename_passwords));
-
-            match parsed_command.get("usernames") {
-                Some(path) => {
-                    if let Ok(usernames) = read_lines(path) {
-                        log("dictionary attack in progress...");
-                        if !parsed_command.get("verbose").is_some() {
-                            log("enable verbose mode to view the attack progress status");
-                        }
-                        for line in usernames {
-                            if let Ok(username) = line {
-                                dictionary_attack(
-                                    &work_queue_sender,
-                                    filename_passwords.as_str(),
-                                    &username,
-                                    num_threads,
-                                );
-                            }
-                        }
-                        drop(work_queue_sender);
-                    }
-                }
-                None => {
-                    let param_username = parsed_command.get("username").unwrap();
-                    log("dictionary attack in progress...");
-                    if !parsed_command.get("verbose").is_some() {
-                        log("enable verbose mode to view the attack progress status");
-                    }
-                    dictionary_attack(
-                        &work_queue_sender,
-                        filename_passwords.as_str(),
-                        &param_username,
-                        num_threads,
-                    );
-                    drop(work_queue_sender);
-                    return ();
-                }
-            };
-        });
+        generate_and_feed_threads(&parsed_command, original_command, uri.as_str());
     } else {
         log("No Basic HTTP Authentication detected");
         log("Application will be terminated");
         process::exit(0x0000);
     }
+}
+
+fn generate_and_feed_threads(
+    parsed_command: &HashMap<String, String>,
+    original_command: &str,
+    uri: &str,
+) {
+    let num_threads = load_env_variable_as_usize(MAX_NMUM_THREADS, num_cpus::get(), true);
+    let channel_buffer = load_env_variable_as_usize(CHANNEL_BUFFER, CHANNEL_BUFFER_DEF_VALUE, true);
+
+    log(&format!("The channel buffer is {}", channel_buffer));
+    let start = Instant::now();
+    let dictionary_attack = check_username_and_passwords;
+    rayon::scope(|s| {
+        let mut failed_and_restored_requests = 0;
+        let (work_queue_sender, work_queue_receiver) = crossbeam_channel::bounded(channel_buffer);
+        log(&format!("I will use [ {} ] threads", num_threads));
+        for task_counter in 0..num_threads {
+            let pc = parsed_command.clone();
+            let work_receiver: Receiver<String> = work_queue_receiver.clone();
+            s.spawn(move |_| {
+                task::block_on(do_job(
+                    task_counter,
+                    num_threads,
+                    uri,
+                    &start,
+                    work_receiver,
+                    original_command,
+                    &mut failed_and_restored_requests,
+                    &pc,
+                ));
+            });
+        }
+
+        let filename_passwords = parsed_command.get("dictionary").unwrap();
+        log(&format!(" Reading filename {}...", &filename_passwords));
+
+        match parsed_command.get("usernames") {
+            Some(path) => {
+                if let Ok(usernames) = read_lines(path) {
+                    log("dictionary attack in progress...");
+                    if !parsed_command.get("verbose").is_some() {
+                        log("enable verbose mode to view the attack progress status");
+                    }
+                    for line in usernames {
+                        if let Ok(username) = line {
+                            dictionary_attack(
+                                &work_queue_sender,
+                                filename_passwords.as_str(),
+                                &username,
+                                num_threads,
+                            );
+                        }
+                    }
+                    drop(work_queue_sender);
+                }
+            }
+            None => {
+                let param_username = parsed_command.get("username").unwrap();
+                log("dictionary attack in progress...");
+                if !parsed_command.get("verbose").is_some() {
+                    log("enable verbose mode to view the attack progress status");
+                }
+                dictionary_attack(
+                    &work_queue_sender,
+                    filename_passwords.as_str(),
+                    &param_username,
+                    num_threads,
+                );
+                drop(work_queue_sender);
+                return ();
+            }
+        };
+    });
 }
 
 fn check_username_and_passwords(
@@ -209,18 +213,24 @@ async fn attack_request(
     failed_and_restored_requests: &mut i32,
     parsed_command: &HashMap<String, String>,
 ) -> Result<BruteResponse, String> {
+    let max_failed_requests = match parsed_command.get("max_failed_requests") {
+        Some(val) => val.parse::<i32>().unwrap(),
+        None => -1,
+    };
+
     let auth = base64::encode(format!("{}:{}", &username, &password));
-    let status = http_req(
+    let result = http_req(
         uri,
         &auth,
         username,
         &password,
         failed_and_restored_requests,
+        max_failed_requests,
     )
     .await;
 
-    if status.is_ok() {
-        let result = status.unwrap();
+    if result.is_ok() {
+        let result = result.unwrap();
         print_result(
             idx,
             &result.message,
