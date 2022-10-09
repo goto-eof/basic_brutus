@@ -18,25 +18,26 @@ Basic Brutus creates a group of threads on which it distributes work while the d
 cargo run -q
 ```
 
-Use `-u` to specify the username, `-t` to specify the target uri, `-d` to specify the complete path to the password dictionary, `-v` to specify the usernames file.
+Use `-u` to specify the username, `-t` to specify the target uri, `-d` to specify the complete path to the password dictionary, `-uu` to specify the usernames file, '-v' to specify the verbose mode.
 
 ```
--u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
+-u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt -v true
 ```
 
 or
 
 ```
--t https://website.com/something -v /PATH/TO/USERNAMES_FILE.txt  -d /PATH/TO/DICTIONARY.txt
+-t https://website.com/something -uu /PATH/TO/USERNAMES_FILE.txt  -d /PATH/TO/DICTIONARY.txt -v true
 ```
 
-### Command line:
+### Environment variables
 
-Make executable:
+The environment variables are found in the .env file of the project and allows you to alter the behavior of the application.
 
-```
-cargo build
-```
+- `CHANNEL_BUFFER=10000000` - buffer size of the inter-thread communication channel. The default value is 10000000.
+- `MAX_NUM_THREADS=12` - if specified, the default thread count (corresponding to the number of processor cores) will be overwritten by the value specified by the user in the .env file.
+
+# Command line:
 
 To view all commands:
 
@@ -47,21 +48,14 @@ basic_brutus --help
 To run a dictionary attack:
 
 ```
-./basic_brutus -u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
+./basic_brutus -u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt -v true
 ```
 
 or
 
 ```
-./basic_brutus -v /PATH/TO/USERNAMES_FILE.txt -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
+./basic_brutus -uu /PATH/TO/USERNAMES_FILE.txt -t https://website.com/something -d /PATH/TO/DICTIONARY.txt -v true
 ```
-
-### Environment variables
-
-The environment variables are found in the .env file of the project and allows you to alter the behavior of the application.
-
-- `CHANNEL_BUFFER=10000000` - buffer size of the inter-thread communication channel. The default value is 10000000.
-- `MAX_NUM_THREADS=12` - if specified, the default thread count (corresponding to the number of processor cores) will be overwritten by the value specified by the user in the .env file.
 
 # Dictionaries
 
