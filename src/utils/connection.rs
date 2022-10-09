@@ -1,6 +1,18 @@
 use async_std::task;
 use chrono::{Timelike, Utc};
-use reqwest::Response;
+use reqwest::{Response, StatusCode};
+
+pub fn is_basic_protected(uri: &str) -> Option<()> {
+    let empty = "";
+    let res = task::block_on(async move { request(uri, empty).await });
+    match res {
+        Ok(data) => match data.status() {
+            StatusCode::UNAUTHORIZED => Some(()),
+            _ => None,
+        },
+        Err(_) => Some(()),
+    }
+}
 
 pub async fn http_req(
     uri: &str,
@@ -9,7 +21,10 @@ pub async fn http_req(
     password: &str,
     failed_and_restored_requests: &mut i32,
 ) -> Result<BruteResponse, String> {
-    let mut res = task::block_on(async move { request(uri, auth).await });
+    let mut res = task::block_on(async move {
+        let auth_base = format!("Base {}", auth);
+        request(uri, &auth_base).await
+    });
 
     while res.is_err() {
         let dt = Utc::now();
@@ -23,7 +38,8 @@ pub async fn http_req(
         );
 
         *failed_and_restored_requests = (*failed_and_restored_requests) + 1;
-        res = task::block_on(async move { request(uri, auth).await });
+        let auth_base = format!("Base {}", auth);
+        res = task::block_on(async move { request(uri, &auth_base.as_str()).await });
     }
 
     if res.unwrap().status().is_success() {
@@ -39,15 +55,15 @@ pub async fn http_req(
 }
 
 async fn request(uri: &str, auth: &str) -> Result<Response, reqwest::Error> {
-    use reqwest::header::USER_AGENT;
+    // use reqwest::header::USER_AGENT;
     reqwest::Client::builder()
         .danger_accept_invalid_certs(true)
         .danger_accept_invalid_hostnames(true)
         .build()
         .unwrap()
         .head(uri)
-        .header(USER_AGENT, "Basic Brutus")
-        .header("Authorization", format!("Base {}", auth))
+        // .header(USER_AGENT, "Basic Brutus")
+        .header("Authorization", auth)
         .send()
         .await
 }
