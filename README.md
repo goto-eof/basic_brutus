@@ -8,7 +8,7 @@ Basic Brutus is a HTTP/HTTPS Basic Authentication and cross platform dictionary 
 
 ## How it works?
 
-Basic Brutus creates a group of threads on which it distributes work while the dictionary file is read line by line. The first thread that manages to get the password X from the channel will be the thread that will also have to process it, which means making an attempt to verify the matching of the username and the password. Basic Brutus ca use the username passed as parameter or load usernames from a file.
+Basic Brutus creates a group of threads on which it distributes work while the dictionary file is read line by line. The first thread that manages to get the password X from the channel will be the thread that will also have to process it, which means making an attempt to verify the matching of the username and the password. Basic Brutus ca use a username passed as parameter or load usernames from a file.
 
 ## How to use it?
 
@@ -16,7 +16,7 @@ Basic Brutus creates a group of threads on which it distributes work while the d
 cargo run -q
 ```
 
-Use `-u` to specify the usenrame, `-t` to specify the target uri, `-d` to specify the complete path to the password dictionary, `-v` to specify the usernames file.
+Use `-u` to specify the username, `-t` to specify the target uri, `-d` to specify the complete path to the password dictionary, `-v` to specify the usernames file.
 
 ```
 -u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
