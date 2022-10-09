@@ -71,7 +71,7 @@ Tested on `MacOS`, `Ubuntu` and `Windows 11` and (today) it works.
 
 ## Comparison
 
-I used the same dictionary file on three different notebooks connected to the mains (energy saving off).
+I used the same dictionary file on three different notebooks with energy saving off.
 
 ```
 1. MacOS       -  M1 Pro                -  8 threads   ->  43.34s
