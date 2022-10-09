@@ -1,11 +1,12 @@
 use async_std::task;
 use reqwest::Response;
 
-pub fn http_req(
+pub async fn http_req(
     uri: &str,
     auth: &str,
     username: &str,
     password: &str,
+    failed_and_restored_requests: &mut i32
 ) -> Result<BruteResponse, String> {
 
     let mut res = task::block_on(async move {
@@ -15,6 +16,7 @@ pub fn http_req(
 
     while res.is_err(){
         println!("[KO] -> Error. Retrying username:[{}], password[{}]...", username, password);
+       *failed_and_restored_requests = (*failed_and_restored_requests) + 1;
          res = task::block_on(async move {
             request(uri, auth).await  
          });

