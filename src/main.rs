@@ -23,7 +23,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let args_str = args.join(" ");
 
-    // TODO validation pre-parsing
+    let original_command: String;
 
     // parsing
     let parsed_command_result: Result<HashMap<String, String>, BasicBrutusError> = match args.len()
@@ -31,9 +31,13 @@ fn main() {
         1 => {
             print_welcome();
             let command = read_line().unwrap();
+            original_command = command.to_string();
             parse(&command)
         }
-        _ => parse(&args_str),
+        _ => {
+            original_command = args_str.to_string();
+            parse(&args_str)
+        }
     };
 
     // validation post-parsing
@@ -46,5 +50,5 @@ fn main() {
     }
 
     // command execution
-    execute_command(parsed_command_result.ok().unwrap());
+    execute_command(parsed_command_result.ok().unwrap(), original_command);
 }

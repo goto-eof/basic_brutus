@@ -16,18 +16,18 @@ use std::{
     time::Instant,
 };
 
-pub fn execute_command(parsed_command: HashMap<String, String>) {
+pub fn execute_command(parsed_command: HashMap<String, String>, original_command: String) {
     let main = parsed_command.get("main");
     match main {
         Some(value) => match value.to_string().as_str() {
             "help" => print_help(),
             command => print_error(format!("Invalid command {}", command)),
         },
-        _ => run_attack(parsed_command),
+        _ => run_attack(parsed_command, &original_command),
     }
 }
 
-fn run_attack(parsed_command: HashMap<String, String>) {
+fn run_attack(parsed_command: HashMap<String, String>, original_command: &str) {
     let num_threads = load_env_variable_as_usize(MAX_NMUM_THREADS, num_cpus::get(), true);
     let channel_buffer = load_env_variable_as_usize(CHANNEL_BUFFER, CHANNEL_BUFFER_DEF_VALUE, true);
     println!("The channel buffer is {}", channel_buffer);
@@ -49,6 +49,7 @@ fn run_attack(parsed_command: HashMap<String, String>) {
                     uri.as_str(),
                     &start,
                     work_receiver,
+                    original_command,
                 );
             });
         }
@@ -129,6 +130,7 @@ fn do_job(
     uri: &str,
     start: &Instant,
     work_receiver: Receiver<String>,
+    original_command: &str,
 ) {
     println!("thread {} initialized", &task_counter);
     loop {
@@ -142,6 +144,7 @@ fn do_job(
                 match attack_request(task_counter, &uri, username, password) {
                     Ok(_) => {
                         let duration = start.elapsed();
+                        println!("original command: {:?}", original_command);
                         println!("duration: {:?}", duration);
                         println!("total n. of threads: {:?}", num_threads);
                         println!("===============================");
