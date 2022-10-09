@@ -1,5 +1,7 @@
 # Basic Brutus :)
 
+![alt basic brutus](./screenshot.png)
+
 ## What is the project «Basic Brutus»?
 
 Basic Brutus is a HTTP/HTTPS Basic Authentication dictionary attack tool implemented in Rust programming language. The aim of this project is to make some experiments with threads in Rust.
@@ -19,7 +21,9 @@ Use `-u` to specify the usenrame, `-t` to specify the target uri, `-d` to specif
 ```
 -u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
 ```
+
 or
+
 ```
 -t https://website.com/something -v /PATH/TO/USERNAMES_FILE.txt  -d /PATH/TO/DICTIONARY.txt
 ```
@@ -43,7 +47,9 @@ To run a dictionary attack:
 ```
 ./basic_brutus -u USERNAME -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
 ```
+
 or
+
 ```
 ./basic_brutus -v /PATH/TO/USERNAMES_FILE.txt -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
 ```
