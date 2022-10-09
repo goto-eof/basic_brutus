@@ -106,4 +106,6 @@ sudo apt-get install libssl-dev
 
 if you downloaded the executable, make sure you allow execution of not verified application. So that go to Settings > Security & Privacy > General, Click on "Allow Anyway", try to execute application again and click on Open option.
 
+## Download
 
+[Here](https://github.com/goto-eof/basic_brutus/releases) you can find the executables.
