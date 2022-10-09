@@ -17,14 +17,15 @@ pub fn print_help() {
     println!("Help:");
     println!("====================================");
     println!("--help = help");
-    println!("====================================");
-    println!("-u = username");
+    println!("-u  = username");
     println!("     Ex. bill.gates");
-    println!("-v = username file path");
+    println!("-uu = username file path");
     println!("     Ex. /directory/usernames.txt");
-    println!("-d = dictionary file path");
+    println!("-v  = verbose");
+    println!("     Ex. true");
+    println!("-d  = dictionary file path");
     println!("     Ex. /dictionary/passwords.txt");
-    println!("-t = uri");
+    println!("-t  = uri");
     println!("     Ex. https://website.com");
     println!("====================================");
 }

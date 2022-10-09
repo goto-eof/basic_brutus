@@ -1,5 +1,5 @@
 use async_std::task;
-use chrono::{Utc, Timelike};
+use chrono::{Timelike, Utc};
 use reqwest::Response;
 
 pub async fn http_req(
@@ -7,47 +7,49 @@ pub async fn http_req(
     auth: &str,
     username: &str,
     password: &str,
-    failed_and_restored_requests: &mut i32
+    failed_and_restored_requests: &mut i32,
 ) -> Result<BruteResponse, String> {
+    let mut res = task::block_on(async move { request(uri, auth).await });
 
-    let mut res = task::block_on(async move {
-       request(uri, auth).await  
-    });
-
-
-    while res.is_err(){
+    while res.is_err() {
         let dt = Utc::now();
-        println!("[{}:{} {}] [KO] -> Error. Retrying username:[{}], password[{}]...", dt.hour(), dt.minute(), dt.second(), username, password);
-       *failed_and_restored_requests = (*failed_and_restored_requests) + 1;
-         res = task::block_on(async move {
-            request(uri, auth).await  
-         });
+        println!(
+            "[{}:{} {}] [KO] -> Error. Retrying username:[{}], password[{}]...",
+            dt.hour(),
+            dt.minute(),
+            dt.second(),
+            username,
+            password
+        );
+
+        *failed_and_restored_requests = (*failed_and_restored_requests) + 1;
+        res = task::block_on(async move { request(uri, auth).await });
     }
 
     if res.unwrap().status().is_success() {
-            return Ok(BruteResponse::new(
-                "Let's login now!".to_string(),
-                username.to_string(),
-                password.to_string(),
-                uri.to_string(),
-                auth.to_string(),
-            ));
+        return Ok(BruteResponse::new(
+            "Let's login now!".to_string(),
+            username.to_string(),
+            password.to_string(),
+            uri.to_string(),
+            auth.to_string(),
+        ));
     }
     return Err("Error".to_string());
 }
 
-async fn request(uri: &str, auth: &str)  -> Result<Response, reqwest::Error> {
+async fn request(uri: &str, auth: &str) -> Result<Response, reqwest::Error> {
     use reqwest::header::USER_AGENT;
     reqwest::Client::builder()
-            .danger_accept_invalid_certs(true)
-            .danger_accept_invalid_hostnames(true)
-            .build()
-            .unwrap()
-            .head(uri)
-            .header(USER_AGENT, "Basic Brutus")
-            .header("Authorization", format!("Base {}", auth))
-            .send()
-            .await
+        .danger_accept_invalid_certs(true)
+        .danger_accept_invalid_hostnames(true)
+        .build()
+        .unwrap()
+        .head(uri)
+        .header(USER_AGENT, "Basic Brutus")
+        .header("Authorization", format!("Base {}", auth))
+        .send()
+        .await
 }
 
 pub struct BruteResponse {
