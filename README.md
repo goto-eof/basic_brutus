@@ -2,15 +2,15 @@
 
 ![alt basic brutus](./screenshot.png)
 
-## What is the project «Basic Brutus»?
+# What is the project «Basic Brutus»?
 
 Basic Brutus is a HTTP/HTTPS Basic Authentication and cross platform dictionary attack tool implemented in Rust programming language. The aim of this project is to make some experiments with threads in Rust.
 
-## How it works?
+# How it works?
 
 Basic Brutus creates a group of threads on which it distributes work while the dictionary file is read line by line. The first thread that manages to get the password X from the channel will be the thread that will also have to process it, which means making an attempt to verify the matching of the username and the password. Basic Brutus ca use a username passed as parameter or load usernames from a file.
 
-## For developers
+# For developers
 
 ### How to use it?
 
@@ -63,15 +63,15 @@ The environment variables are found in the .env file of the project and allows y
 - `CHANNEL_BUFFER=10000000` - buffer size of the inter-thread communication channel. The default value is 10000000.
 - `MAX_NUM_THREADS=12` - if specified, the default thread count (corresponding to the number of processor cores) will be overwritten by the value specified by the user in the .env file.
 
-## Dictionaries
+# Dictionaries
 
 Dictionary files can be found [here](https://github.com/berandal666/Passwords).
 
-## Tests
+# Tests
 
 Tested on `MacOS`, `Ubuntu` and `Windows 11` and (today) it works.
 
-## Comparison
+# Comparison
 
 I used the same dictionary file on three different notebooks with energy saving off.
 
@@ -94,7 +94,7 @@ I used the same dictionary file on three different notebooks with energy saving 
 
 ```
 
-## Linux users
+# Linux users
 
 If you are using Linux, you should install some packages:
 
@@ -104,10 +104,10 @@ sudo apt-get install pkg-config
 sudo apt-get install libssl-dev
 ```
 
-## Mac OS users
+# Mac OS users
 
 if you downloaded the executable, make sure you allow execution of not verified application. So that go to Settings > Security & Privacy > General, Click on "Allow Anyway", try to execute application again and click on Open option.
 
-## Download
+# Download
 
 [Here](https://github.com/goto-eof/basic_brutus/releases) you can find the executables.
