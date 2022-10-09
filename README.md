@@ -1,6 +1,6 @@
 # Basic Brutus :)
 
-![alt basic brutus](./screenshot.png)
+![alt basic brutus](./header.jpg)
 
 # What is the project «Basic Brutus»?
 
