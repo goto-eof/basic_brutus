@@ -12,7 +12,6 @@ use std::{
     collections::HashMap,
     fs::File,
     io::{self, BufRead},
-    path::Path,
     process,
     time::Instant,
 };
@@ -44,7 +43,13 @@ fn run_attack(parsed_command: HashMap<String, String>) {
             let work_receiver: Receiver<String> = work_queue_receiver.clone();
 
             s.spawn(move |_| {
-                do_job(task_counter, num_threads, uri.as_str(), &start, work_receiver);
+                do_job(
+                    task_counter,
+                    num_threads,
+                    uri.as_str(),
+                    &start,
+                    work_receiver,
+                );
             });
         }
 
@@ -118,7 +123,13 @@ fn load_env_variable_as_usize(
     }
 }
 
-fn do_job(task_counter: usize, num_threads: usize, uri: &str, start: &Instant, work_receiver: Receiver<String>) {
+fn do_job(
+    task_counter: usize,
+    num_threads: usize,
+    uri: &str,
+    start: &Instant,
+    work_receiver: Receiver<String>,
+) {
     println!("thread {} initialized", &task_counter);
     loop {
         let tx_res = work_receiver.recv();
@@ -178,10 +189,13 @@ fn attack_request(
     Err("No password found".to_string())
 }
 
-fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
-where
-    P: AsRef<Path>,
-{
-    let file = File::open(filename)?;
+fn read_lines(filename: &str) -> io::Result<io::Lines<io::BufReader<File>>> {
+    let file = match File::open(filename) {
+        Ok(file) => file,
+        Err(err) => {
+            println!("{} for filename {}", err, filename);
+            panic!();
+        }
+    };
     Ok(io::BufReader::new(file).lines())
 }
