@@ -3,6 +3,7 @@ pub mod utils {
     pub mod console;
     pub mod core;
     pub mod file;
+    pub mod logger;
     pub mod parser;
 }
 

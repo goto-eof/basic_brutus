@@ -1,4 +1,3 @@
-use chrono::{Timelike, Utc};
 use crossbeam_channel::Receiver;
 const MAX_NMUM_THREADS: &str = "MAX_NUM_THREADS";
 const CHANNEL_BUFFER: &str = "CHANNEL_BUFFER";
@@ -8,6 +7,7 @@ use async_std::task;
 use super::{
     connection::{http_req, is_basic_protected, BruteResponse},
     console::{print_error, print_help, print_result},
+    logger::log,
 };
 
 use std::{
@@ -33,34 +33,20 @@ fn run_attack(parsed_command: HashMap<String, String>, original_command: &str) {
     let num_threads = load_env_variable_as_usize(MAX_NMUM_THREADS, num_cpus::get(), true);
     let channel_buffer = load_env_variable_as_usize(CHANNEL_BUFFER, CHANNEL_BUFFER_DEF_VALUE, true);
 
-    let dt = Utc::now();
-    println!(
-        "[{}:{} {}] The channel buffer is {}",
-        dt.hour(),
-        dt.minute(),
-        dt.second(),
-        channel_buffer
-    );
+    log(&format!("The channel buffer is {}", channel_buffer));
     let start = Instant::now();
     let uri = parsed_command.get("uri").unwrap();
 
-    let is_basic_protected_result = is_basic_protected(&uri);
+    let basic_protected_result = is_basic_protected(&uri);
 
-    if is_basic_protected_result.is_some() {
-        println!("Basic HTTP Authentication detected");
+    if basic_protected_result.is_some() {
+        log("Basic HTTP Authentication detected");
         let dictionary_attack = check_username_and_passwords;
         rayon::scope(|s| {
             let mut failed_and_restored_requests = 0;
-            let mut dt = Utc::now();
             let (work_queue_sender, work_queue_receiver) =
                 crossbeam_channel::bounded(channel_buffer);
-            println!(
-                "[{}:{} {}] I will use [ {} ] threads",
-                dt.hour(),
-                dt.minute(),
-                dt.second(),
-                num_threads
-            );
+            log(&format!("I will use [ {} ] threads", num_threads));
             for task_counter in 0..num_threads {
                 let pc = parsed_command.clone();
                 let work_receiver: Receiver<String> = work_queue_receiver.clone();
@@ -79,21 +65,14 @@ fn run_attack(parsed_command: HashMap<String, String>, original_command: &str) {
             }
 
             let filename_passwords = parsed_command.get("dictionary").unwrap();
-            dt = Utc::now();
-            println!(
-                "[{}:{} {}] Reading filename {}...",
-                dt.hour(),
-                dt.minute(),
-                dt.second(),
-                &filename_passwords
-            );
+            log(&format!(" Reading filename {}...", &filename_passwords));
 
             match parsed_command.get("usernames") {
                 Some(path) => {
                     if let Ok(usernames) = read_lines(path) {
-                        println!("dictionary attack in progress...");
+                        log("dictionary attack in progress...");
                         if !parsed_command.get("verbose").is_some() {
-                            println!("enable verbose mode to view the attack progress status");
+                            log("enable verbose mode to view the attack progress status");
                         }
                         for line in usernames {
                             if let Ok(username) = line {
@@ -110,9 +89,9 @@ fn run_attack(parsed_command: HashMap<String, String>, original_command: &str) {
                 }
                 None => {
                     let param_username = parsed_command.get("username").unwrap();
-                    println!("dictionary attack in progress...");
+                    log("dictionary attack in progress...");
                     if !parsed_command.get("verbose").is_some() {
-                        println!("enable verbose mode to view the attack progress status");
+                        log("enable verbose mode to view the attack progress status");
                     }
                     dictionary_attack(
                         &work_queue_sender,
@@ -126,8 +105,8 @@ fn run_attack(parsed_command: HashMap<String, String>, original_command: &str) {
             };
         });
     } else {
-        println!("No Basic HTTP Authentication detected");
-        println!("Application will be terminated");
+        log("No Basic HTTP Authentication detected");
+        log("Application will be terminated");
         process::exit(0x0000);
     }
 }
@@ -178,14 +157,10 @@ async fn do_job(
     failed_and_restored_requests: &mut i32,
     parsed_command: &HashMap<String, String>,
 ) {
-    let dt = Utc::now();
-    println!(
-        "[{}:{} {}] thread {} initialized and started the job",
-        dt.hour(),
-        dt.minute(),
-        dt.second(),
+    log(&format!(
+        "thread {} initialized and started the job",
         &task_counter
-    );
+    ));
 
     loop {
         let tx_res = work_receiver.recv();
@@ -204,32 +179,22 @@ async fn do_job(
                     parsed_command,
                 )) {
                     Ok(_) => {
-                        let dt = Utc::now();
                         let duration = start.elapsed();
-                        println!("{}:{} {}", dt.hour(), dt.minute(), dt.second(),);
-                        println!("original command: {:?}", original_command);
-                        println!("duration: {:?}", duration);
-                        println!("total n. of threads: {:?}", num_threads);
-                        println!(
+                        log(&format!("original command: {:?}", original_command));
+                        log(&format!("duration: {:?}", duration));
+                        log(&format!("total n. of threads: {:?}", num_threads));
+                        log(&format!(
                             "failed and restored requests: {:?}",
-                            failed_and_restored_requests
-                        );
-                        println!("===============================");
+                            failed_and_restored_requests,
+                        ));
+                        log("===============================");
                         process::exit(0x0000);
                     }
                     Err(_) => (),
                 }
             }
             Err(err) => {
-                let dt = Utc::now();
-                println!(
-                    "[{}:{} {}] thread {} finished job: {}",
-                    dt.hour(),
-                    dt.minute(),
-                    dt.second(),
-                    &task_counter,
-                    err
-                );
+                log(&format!("thread {} finished job: {}", &task_counter, err));
                 break;
             }
         }
@@ -266,19 +231,15 @@ async fn attack_request(
         );
         return Ok(result);
     } else {
-        let dt = Utc::now();
         if parsed_command.get("verbose").is_some()
             && parsed_command.get("verbose").unwrap() == "true"
         {
-            println!(
-                "[{}:{} {}] [KO] -> thread: [{}], username: [{}], password: [{}]",
-                dt.hour(),
-                dt.minute(),
-                dt.second(),
+            log(&format!(
+                "[KO] -> thread: [{}] ({}:{})",
                 idx + 1,
                 &username,
                 &password
-            );
+            ));
         }
     }
     Err("No password found".to_string())
@@ -288,15 +249,7 @@ fn read_lines(filename: &str) -> io::Result<io::Lines<io::BufReader<File>>> {
     let file = match File::open(filename) {
         Ok(file) => file,
         Err(err) => {
-            let dt = Utc::now();
-            println!(
-                "[{}:{} {}] {} for filename {}",
-                dt.hour(),
-                dt.minute(),
-                dt.second(),
-                err,
-                filename
-            );
+            log(&format!("{} for filename {}", err, filename));
             panic!();
         }
     };

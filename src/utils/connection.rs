@@ -1,6 +1,7 @@
 use async_std::task;
-use chrono::{Timelike, Utc};
 use reqwest::{Response, StatusCode};
+
+use super::logger::log;
 
 pub fn is_basic_protected(uri: &str) -> Option<()> {
     let empty = "";
@@ -27,15 +28,10 @@ pub async fn http_req(
     });
 
     while res.is_err() {
-        let dt = Utc::now();
-        println!(
-            "[{}:{} {}] [KO] -> Error. Retrying username:[{}], password[{}]...",
-            dt.hour(),
-            dt.minute(),
-            dt.second(),
-            username,
-            password
-        );
+        log(&format!(
+            "[KO] -> Error. Retrying username:[{}], password[{}]...",
+            username, password
+        ));
 
         *failed_and_restored_requests = (*failed_and_restored_requests) + 1;
         let auth_base = format!("Base {}", auth);
