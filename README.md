@@ -71,16 +71,25 @@ Tested on `MacOS`, `Ubuntu` and `Windows 11` and (today) it works.
 
 ## Comparison
 
-I used the same dictionary file on three different notebooks not connected to the mains.
+I used the same dictionary file on three different notebooks connected to the mains (energy saving off).
 
 ```
-1. MacOS       -  M1 Pro                -  8 threads   ->  ~42s
-1. MacOS       -  M1 Pro                -  1 thread    ->  ~240s
+1. MacOS       -  M1 Pro                -  8 threads   ->  43.34s
+1. MacOS       -  M1 Pro                -  8 threads   ->  42.08s
+1. MacOS       -  M1 Pro                -  8 threads   ->  43.63s
 -----------------------------------------------------------------
-2. Windows 11  -  Intel i7-10750H       -  12 threads  ->  ~70s
-2. Ubuntu      -  Intel i7-10750H       -  12 threads  ->  ~72s
+2. Windows 11  -  Intel i7-10750H       -  12 threads  ->  31.80s
+2. Windows 11  -  Intel i7-10750H       -  12 threads  ->  60.15s
+2. Windows 11  -  Intel i7-10750H       -  12 threads  ->  30.98s
+
+2. Ubuntu      -  Intel i7-10750H       -  12 threads  ->  48.61s
+2. Ubuntu      -  Intel i7-10750H       -  12 threads  ->  61.04s
+2. Ubuntu      -  Intel i7-10750H       -  12 threads  ->  65.48s
 -----------------------------------------------------------------
-3. Ubuntu      -  AMD Ryzen 7 (4800H)   -  16 threads  ->  ~133s
+3. Ubuntu      -  AMD Ryzen 7 (4800H)   -  16 threads  ->  139.42s
+3. Ubuntu      -  AMD Ryzen 7 (4800H)   -  16 threads  ->  140.37s
+3. Ubuntu      -  AMD Ryzen 7 (4800H)   -  16 threads  ->  136.08s
+
 ```
 
 ## Linux users

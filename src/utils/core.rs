@@ -1,3 +1,4 @@
+use chrono::{Utc, Timelike};
 use crossbeam_channel::Receiver;
 
 const MAX_NMUM_THREADS: &str = "MAX_NUM_THREADS";
@@ -31,7 +32,8 @@ pub fn execute_command(parsed_command: HashMap<String, String>, original_command
 fn run_attack(parsed_command: HashMap<String, String>, original_command: &str) {
     let num_threads = load_env_variable_as_usize(MAX_NMUM_THREADS, num_cpus::get(), true);
     let channel_buffer = load_env_variable_as_usize(CHANNEL_BUFFER, CHANNEL_BUFFER_DEF_VALUE, true);
-    println!("The channel buffer is {}", channel_buffer);
+    let dt = Utc::now();
+    println!("[{}:{} {}] The channel buffer is {}", dt.hour(), dt.minute(), dt.second(), channel_buffer);
     let start = Instant::now();
     let uri = parsed_command.get("uri").unwrap();
 
@@ -40,8 +42,9 @@ fn run_attack(parsed_command: HashMap<String, String>, original_command: &str) {
     
     rayon::scope(|s| {
         let mut failed_and_restored_requests = 0;
+        let mut dt = Utc::now();
         let (work_queue_sender, work_queue_receiver) = crossbeam_channel::bounded(channel_buffer);
-        println!("I will use [ {} ] threads", num_threads);
+        println!("[{}:{} {}] I will use [ {} ] threads", dt.hour(), dt.minute(), dt.second(),  num_threads);
         for task_counter in 0..num_threads {
             let work_receiver: Receiver<String> = work_queue_receiver.clone();
 
@@ -59,7 +62,8 @@ fn run_attack(parsed_command: HashMap<String, String>, original_command: &str) {
         }
 
         let filename_passwords = parsed_command.get("dictionary").unwrap();
-        println!("Reading filename {}...", &filename_passwords);
+        dt = Utc::now();
+        println!("[{}:{} {}] Reading filename {}...",dt.hour(), dt.minute(), dt.second(), &filename_passwords);
 
         match parsed_command.get("usernames") {
             Some(path) => {
@@ -137,7 +141,8 @@ fn load_env_variable_as_usize(
     original_command: &str,
     failed_and_restored_requests: &mut i32
 ) {
-    println!("thread {} initialized", &task_counter);
+    let dt = Utc::now();
+    println!("[{}:{} {}] thread {} initialized", dt.hour(), dt.minute(), dt.second(), &task_counter);
 
     loop {
         let tx_res = work_receiver.recv();
@@ -149,7 +154,9 @@ fn load_env_variable_as_usize(
                 let password = &tx[separator_pos + 1..];
                 match task::block_on(attack_request(task_counter, &uri, username, password, failed_and_restored_requests)) {
                     Ok(_) => {
+                        let dt = Utc::now();
                         let duration = start.elapsed();
+                        println!("{}:{} {}", dt.hour(), dt.minute(), dt.second(), );
                         println!("original command: {:?}", original_command);
                         println!("duration: {:?}", duration);
                         println!("total n. of threads: {:?}", num_threads);
@@ -161,7 +168,8 @@ fn load_env_variable_as_usize(
                 }
             }
             Err(err) => {
-                println!("thread {} finished job: {}", &task_counter, err);
+                let dt = Utc::now();
+                println!("[{}:{} {}] thread {} finished job: {}", dt.hour(), dt.minute(), dt.second(), &task_counter, err);
                 break;
             }
         }
@@ -190,8 +198,10 @@ async fn attack_request(
         );
         return Ok(result);
     } else {
+        let dt = Utc::now();
         println!(
-            "[KO] -> thread: [{}], username: [{}], password: [{}]",
+            "[{}:{} {}] [KO] -> thread: [{}], username: [{}], password: [{}]",
+            dt.hour(), dt.minute(), dt.second(), 
             idx + 1,
             &username,
             &password
@@ -204,7 +214,8 @@ fn read_lines(filename: &str) -> io::Result<io::Lines<io::BufReader<File>>> {
     let file = match File::open(filename) {
         Ok(file) => file,
         Err(err) => {
-            println!("{} for filename {}", err, filename);
+            let dt = Utc::now();
+            println!("[{}:{} {}] {} for filename {}", dt.hour(), dt.minute(), dt.second(), err, filename);
             panic!();
         }
     };

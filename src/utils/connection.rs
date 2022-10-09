@@ -1,4 +1,5 @@
 use async_std::task;
+use chrono::{Utc, Timelike};
 use reqwest::Response;
 
 pub async fn http_req(
@@ -15,7 +16,8 @@ pub async fn http_req(
 
 
     while res.is_err(){
-        println!("[KO] -> Error. Retrying username:[{}], password[{}]...", username, password);
+        let dt = Utc::now();
+        println!("[{}:{} {}] [KO] -> Error. Retrying username:[{}], password[{}]...", dt.hour(), dt.minute(), dt.second(), username, password);
        *failed_and_restored_requests = (*failed_and_restored_requests) + 1;
          res = task::block_on(async move {
             request(uri, auth).await  
@@ -41,7 +43,7 @@ async fn request(uri: &str, auth: &str)  -> Result<Response, reqwest::Error> {
             .danger_accept_invalid_hostnames(true)
             .build()
             .unwrap()
-            .get(uri)
+            .head(uri)
             .header(USER_AGENT, "Basic Brutus")
             .header("Authorization", format!("Base {}", auth))
             .send()
