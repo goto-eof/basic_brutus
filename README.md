@@ -4,7 +4,7 @@
 
 ## What is the project «Basic Brutus»?
 
-Basic Brutus is a HTTP/HTTPS Basic Authentication dictionary attack tool implemented in Rust programming language. The aim of this project is to make some experiments with threads in Rust.
+Basic Brutus is a HTTP/HTTPS Basic Authentication and cross platform dictionary attack tool implemented in Rust programming language. The aim of this project is to make some experiments with threads in Rust.
 
 ## How it works?
 
