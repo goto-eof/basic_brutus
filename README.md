@@ -10,7 +10,9 @@ Basic Brutus is a HTTP/HTTPS Basic Authentication and cross platform dictionary 
 
 Basic Brutus creates a group of threads on which it distributes work while the dictionary file is read line by line. The first thread that manages to get the password X from the channel will be the thread that will also have to process it, which means making an attempt to verify the matching of the username and the password. Basic Brutus ca use a username passed as parameter or load usernames from a file.
 
-## How to use it?
+## For developers
+
+### How to use it?
 
 ```
 cargo run -q
@@ -28,7 +30,7 @@ or
 -t https://website.com/something -v /PATH/TO/USERNAMES_FILE.txt  -d /PATH/TO/DICTIONARY.txt
 ```
 
-## Command line:
+### Command line:
 
 Make executable:
 
@@ -54,7 +56,7 @@ or
 ./basic_brutus -v /PATH/TO/USERNAMES_FILE.txt -t https://website.com/something -d /PATH/TO/DICTIONARY.txt
 ```
 
-## Environment variables
+### Environment variables
 
 The environment variables are found in the .env file of the project and allows you to alter the behavior of the application.
 
