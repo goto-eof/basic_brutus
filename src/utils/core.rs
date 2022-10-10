@@ -224,6 +224,7 @@ async fn attack_request(
         &password,
         failed_and_restored_requests,
         max_failed_requests,
+        parsed_command,
     )
     .await;
 

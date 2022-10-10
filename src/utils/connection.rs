@@ -1,4 +1,6 @@
-use super::logger::{error, info, log, warn};
+use std::collections::HashMap;
+
+use super::logger::error;
 use async_std::task;
 use reqwest::{Response, StatusCode};
 
@@ -21,6 +23,7 @@ pub async fn http_req(
     password: &str,
     failed_and_restored_requests: &mut i32,
     max_failed_requests: i32,
+    parsed_command: &HashMap<String, String>,
 ) -> Result<BruteResponse, BruteFailedMatchResponse> {
     let mut res = task::block_on(async move {
         let auth_base = format!("Base {}", auth);
@@ -31,10 +34,12 @@ pub async fn http_req(
 
     while res.is_err() && (max_failed_requests == -1 || count_failed_requests < max_failed_requests)
     {
-        error(&format!(
-            "[KO] -> Error. Retrying username:[{}], password[{}]...",
-            username, password
-        ));
+        if parsed_command.get("max_failed_requests").is_none() {
+            error(&format!(
+                "[KO] -> Error. Retrying username:[{}], password[{}]...",
+                username, password
+            ));
+        }
 
         count_failed_requests = count_failed_requests + 1;
 
