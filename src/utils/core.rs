@@ -2,14 +2,12 @@ use crossbeam_channel::Receiver;
 const MAX_NMUM_THREADS: &str = "MAX_NUM_THREADS";
 const CHANNEL_BUFFER: &str = "CHANNEL_BUFFER";
 const CHANNEL_BUFFER_DEF_VALUE: usize = 10000000;
-use async_std::task;
-
 use super::{
     connection::{http_req, is_basic_protected, BruteResponse},
-    console::{print_error, print_help, print_result},
-    logger::log,
+    console::{print_help, print_result},
+    logger::{error, info, log, warn},
 };
-
+use async_std::task;
 use std::{
     collections::HashMap,
     fs::File,
@@ -23,7 +21,7 @@ pub fn execute_command(parsed_command: HashMap<String, String>, original_command
     match main {
         Some(value) => match value.to_string().as_str() {
             "help" => print_help(),
-            command => print_error(format!("Invalid command {}", command)),
+            command => error(&format!("Invalid command {}", command)),
         },
         _ => run_attack(parsed_command, &original_command),
     }
@@ -32,11 +30,11 @@ pub fn execute_command(parsed_command: HashMap<String, String>, original_command
 fn run_attack(parsed_command: HashMap<String, String>, original_command: &str) {
     let uri = parsed_command.get("uri").unwrap();
     if is_basic_protected(&uri).is_some() {
-        log("Basic HTTP Authentication detected");
+        warn("Basic HTTP Authentication detected");
         generate_and_feed_threads(&parsed_command, original_command, uri.as_str());
     } else {
-        log("No Basic HTTP Authentication detected");
-        log("Application will be terminated");
+        error("No Basic HTTP Authentication detected");
+        warn("Application will be terminated");
         process::exit(0x0000);
     }
 }
@@ -49,13 +47,13 @@ fn generate_and_feed_threads(
     let num_threads = load_env_variable_as_usize(MAX_NMUM_THREADS, num_cpus::get(), true);
     let channel_buffer = load_env_variable_as_usize(CHANNEL_BUFFER, CHANNEL_BUFFER_DEF_VALUE, true);
 
-    log(&format!("The channel buffer is {}", channel_buffer));
+    info(&format!("The channel buffer is {}", channel_buffer));
     let start = Instant::now();
     let dictionary_attack = check_username_and_passwords;
     rayon::scope(|s| {
         let mut failed_and_restored_requests = 0;
         let (work_queue_sender, work_queue_receiver) = crossbeam_channel::bounded(channel_buffer);
-        log(&format!("I will use [ {} ] threads", num_threads));
+        info(&format!("I will use [ {} ] threads", num_threads));
         for task_counter in 0..num_threads {
             let pc = parsed_command.clone();
             let work_receiver: Receiver<String> = work_queue_receiver.clone();
@@ -74,14 +72,14 @@ fn generate_and_feed_threads(
         }
 
         let filename_passwords = parsed_command.get("dictionary").unwrap();
-        log(&format!(" Reading filename {}...", &filename_passwords));
+        info(&format!(" Reading filename {}...", &filename_passwords));
 
         match parsed_command.get("usernames") {
-            Some(path) => {
-                if let Ok(usernames) = read_lines(path) {
-                    log("dictionary attack in progress...");
+            Some(usernames_file) => {
+                if let Ok(usernames) = read_lines(usernames_file) {
+                    warn("dictionary attack in progress...");
                     if !parsed_command.get("verbose").is_some() {
-                        log("enable verbose mode to view the attack progress status");
+                        info("enable verbose mode to view the attack progress status");
                     }
                     for line in usernames {
                         if let Ok(username) = line {
@@ -98,9 +96,9 @@ fn generate_and_feed_threads(
             }
             None => {
                 let param_username = parsed_command.get("username").unwrap();
-                log("dictionary attack in progress...");
+                warn("dictionary attack in progress...");
                 if !parsed_command.get("verbose").is_some() {
-                    log("enable verbose mode to view the attack progress status");
+                    info("enable verbose mode to view the attack progress status");
                 }
                 dictionary_attack(
                     &work_queue_sender,
@@ -161,7 +159,7 @@ async fn do_job(
     failed_and_restored_requests: &mut i32,
     parsed_command: &HashMap<String, String>,
 ) {
-    log(&format!(
+    info(&format!(
         "thread {} initialized and started the job",
         &task_counter
     ));
@@ -198,7 +196,7 @@ async fn do_job(
                 }
             }
             Err(err) => {
-                log(&format!("thread {} finished job: {}", &task_counter, err));
+                warn(&format!("thread {} finished job: {}", &task_counter, err));
                 break;
             }
         }
@@ -219,7 +217,7 @@ async fn attack_request(
     };
 
     let auth = base64::encode(format!("{}:{}", &username, &password));
-    let result = http_req(
+    let result: Result<BruteResponse, super::connection::BruteFailedMatchResponse> = http_req(
         uri,
         &auth,
         username,
@@ -244,9 +242,11 @@ async fn attack_request(
         if parsed_command.get("verbose").is_some()
             && parsed_command.get("verbose").unwrap() == "true"
         {
+            let err = result.err().unwrap();
             log(&format!(
-                "[KO] -> thread: [{}] ({}:{})",
+                "[KO] -> thread: [{}] attempts: {}, ({}:{})",
                 idx + 1,
+                err.attempts,
                 &username,
                 &password
             ));
@@ -259,7 +259,7 @@ fn read_lines(filename: &str) -> io::Result<io::Lines<io::BufReader<File>>> {
     let file = match File::open(filename) {
         Ok(file) => file,
         Err(err) => {
-            log(&format!("{} for filename {}", err, filename));
+            error(&format!("{} for filename {}", err, filename));
             panic!();
         }
     };

@@ -1,7 +1,6 @@
+use super::logger::{error, info, log, warn};
 use async_std::task;
 use reqwest::{Response, StatusCode};
-
-use super::logger::log;
 
 pub fn is_basic_protected(uri: &str) -> Option<()> {
     let empty = "";
@@ -22,7 +21,7 @@ pub async fn http_req(
     password: &str,
     failed_and_restored_requests: &mut i32,
     max_failed_requests: i32,
-) -> Result<BruteResponse, String> {
+) -> Result<BruteResponse, BruteFailedMatchResponse> {
     let mut res = task::block_on(async move {
         let auth_base = format!("Base {}", auth);
         request(uri, &auth_base).await
@@ -32,7 +31,7 @@ pub async fn http_req(
 
     while res.is_err() && (max_failed_requests == -1 || count_failed_requests < max_failed_requests)
     {
-        log(&format!(
+        error(&format!(
             "[KO] -> Error. Retrying username:[{}], password[{}]...",
             username, password
         ));
@@ -45,14 +44,15 @@ pub async fn http_req(
     }
 
     if res.is_err() {
-        return Err(format!(
+        let message = format!(
             "Attempts: {}, Error {}",
             count_failed_requests,
             res.err().unwrap()
-        ));
+        );
+        let response = BruteFailedMatchResponse::new(count_failed_requests, message);
+        return Err(response);
     }
 
-    log(&format!("Attempts: {}", count_failed_requests));
     if res.unwrap().status().is_success() {
         return Ok(BruteResponse::new(
             "Let's login now!".to_string(),
@@ -60,9 +60,13 @@ pub async fn http_req(
             password.to_string(),
             uri.to_string(),
             auth.to_string(),
+            count_failed_requests,
         ));
-    }
-    return Err("Username and password does not match".to_string());
+    };
+
+    let message = "Username and password does not match".to_string();
+    let response = BruteFailedMatchResponse::new(count_failed_requests, message);
+    return Err(response);
 }
 
 async fn request(uri: &str, auth: &str) -> Result<Response, reqwest::Error> {
@@ -85,6 +89,7 @@ pub struct BruteResponse {
     pub password: String,
     pub uri: String,
     pub base64: String,
+    pub attempts: i32,
 }
 
 impl BruteResponse {
@@ -94,6 +99,7 @@ impl BruteResponse {
         password: String,
         uri: String,
         base64: String,
+        attempts: i32,
     ) -> Self {
         Self {
             message,
@@ -101,6 +107,19 @@ impl BruteResponse {
             password,
             uri,
             base64,
+            attempts,
         }
+    }
+}
+
+#[derive(Debug)]
+pub struct BruteFailedMatchResponse {
+    pub attempts: i32,
+    pub message: String,
+}
+
+impl BruteFailedMatchResponse {
+    fn new(attempts: i32, message: String) -> Self {
+        Self { attempts, message }
     }
 }

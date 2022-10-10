@@ -29,9 +29,6 @@ pub fn print_help() {
     println!("     Ex. https://website.com");
     println!("====================================");
 }
-pub fn print_error(err_message: String) {
-    println!("{}", err_message);
-}
 
 pub fn print_result(
     idx: usize,
