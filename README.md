@@ -103,3 +103,5 @@ if you downloaded the executable, make sure you allow execution of not verified 
 # Download
 
 [Here](https://github.com/goto-eof/basic_brutus/releases) you can find the executables.
+
+if any problems arise, feel free to [contact me](https://andre-i.dev/#contactme).
